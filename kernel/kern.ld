@@ -6,6 +6,11 @@ OUTPUT_ARCH(i386)
 ENTRY(_start)
 kernel_load_addr = 0x100000;
 
+PHDRS
+{
+    LOAD PT_LOAD AT(kernel_load_addr) FLAGS(PF_X|PF_R);
+}
+
 SECTIONS
 {
 	. = kernel_load_addr;
@@ -14,7 +19,7 @@ SECTIONS
 	   the boot loader where to load the kernel in physical memory */
 	.text : {
 		*(.text .stub .text.* .gnu.linkonce.t.*)
-	}
+	} : LOAD
 	PROVIDE(etext = .);	/* Define the 'etext' symbol to this value */
 
 	.rodata : {

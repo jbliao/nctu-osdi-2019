@@ -1,6 +1,7 @@
 #Its for create a simple bootloader 
 
 BOOT_OBJS = boot/boot.o boot/main.o
+LDFLAGS = -m elf_i386
 
 boot/%.o: boot/%.c
 	$(CC) $(CFLAGS) -Os -c -o $@ $<

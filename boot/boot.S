@@ -7,8 +7,8 @@
 .globl start
 start:
 	.code16                     # Assemble for 16-bit mode
-
-	# Set up the important data segment registers (DS, ES, SS).
+	
+    # Set up the important data segment registers (DS, ES, SS).
 	xorw    %ax,%ax             # Segment number zero
 	movw    %ax,%ds             # -> Data Segment
 	movw    %ax,%es             # -> Extra Segment
@@ -41,10 +41,10 @@ protcseg:
 	movw    %ax, %ss                # -> SS: Stack Segment
 
 	# Set up the stack pointer and call into C.
-	  movl    $start, %esp
-	  call bootmain
+    movl    $start, %esp
+    call    bootmain
 loop:
-	jmp loop
+    jmp     loop
 
 # Bootstrap GDT
 	.p2align 2                                # force 4 byte alignment
@@ -60,13 +60,14 @@ gdt:
 #       easy-to-use macro when defining segmentation type.
 
 	SEG_NULL    # NULL segment
-	SEG()     # Kernel code segment
-	SEG()     # Kernel data segment
+
+    SEG(STA_X|STA_R, 0, 0xFFFF << 12)    # Kernel code segment
+	SEG(STA_W, 0x0, 0xFFFF << 12)     # Kernel data segment
 
 # TODO: Please fillup the GDT register for gdt in order to used
 #       with "lgdt" instruction.
 # Note: You can reference lab3_reference page 13 for detail meaning
 #       of each bit of GDT register.
 gdtdesc: 
-	.word	# gdt limit
-	.word	# gdt base
+	.word gdtdesc - gdt - 1	# gdt limit
+	.word gdt, 0x0	# gdt base
