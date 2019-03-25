@@ -16,6 +16,11 @@ static struct Trapframe *last_tf;
  *       function addresses can't be represented in relocation records.
  */
 
+struct Gatedesc idt[256];
+struct Pseudodesc t = {
+        .pd_lim = sizeof(idt),
+        .pd_base = idt
+};
 
 /* For debugging */
 static const char *trapname(int trapno)
@@ -119,6 +124,11 @@ trap_dispatch(struct Trapframe *tf)
    */
 
 	// Unexpected trap: The user process or the kernel has a bug.
+    switch(tf->tf_trapno){
+        case IRQ_OFFSET+IRQ_KBD:
+            kbd_intr();
+            return;
+    }
 	print_trapframe(tf);
 }
 
@@ -135,33 +145,37 @@ void default_trap_handler(struct Trapframe *tf)
 	trap_dispatch(tf);
 }
 
-
 void trap_init()
 {
-  /* TODO: You should initialize the interrupt descriptor table.
-   *       You should setup at least keyboard interrupt and timer interrupt as
-   *       the lab's requirement.
-   *
-   *       Noted that there is another file kernel/trap_entry.S, in which places
-   *       all the entry of interrupt handler.
-   *       Thus, you can declare an interface there by macro providing there and
-   *       use that function pointer when setting up the corresponding IDT entry.
-   *
-   *       By doing so, we can have more flexibility in adding new IDT entry and 
-   *       reuse the routine when interrupt occurs.
-   *
-   *       Remember to load you IDT with x86 assembly instruction lidt.
-   *
-   * Note:
-   *       You might be benefitted from the macro SETGATE inside mmu.h      
-   *       There are defined macros for Segment Selectors in mmu.h
-   *       Also, check out inc/x86.h for easy-to-use x86 assembly instruction
-   *       There is a data structure called Pseudodesc in mmu.h which might
-   *       come in handy for you when filling up the argument of "lidt"
-   */
+   /* TODO: You should initialize the interrupt descriptor table.
+    *       You should setup at least keyboard interrupt and timer interrupt as
+    *       the lab's requirement.
+    *
+    *       Noted that there is another file kernel/trap_entry.S, in which places
+    *       all the entry of interrupt handler.
+    *       Thus, you can declare an interface there by macro providing there and
+    *       use that function pointer when setting up the corresponding IDT entry.
+    *
+    *       By doing so, we can have more flexibility in adding new IDT entry and 
+    *       reuse the routine when interrupt occurs.
+    *
+    *       Remember to load you IDT with x86 assembly instruction lidt.
+    *
+    * Note:
+    *       You might be benefitted from the macro SETGATE inside mmu.h      
+    *       There are defined macros for Segment Selectors in mmu.h
+    *       Also, check out inc/x86.h for easy-to-use x86 assembly instruction
+    *       There is a data structure called Pseudodesc in mmu.h which might
+    *       come in handy for you when filling up the argument of "lidt"
+    */
 
-	/* Keyboard interrupt setup */
-	/* Timer Trap setup */
-  /* Load IDT */
+    /* Keyboard interrupt setup */
+    extern kbd_isr();
+    SETGATE(idt[ IRQ_OFFSET +IRQ_KBD  ], false, GD_KT, kbd_isr, 0);
+    /* Timer Trap setup */
+//    extern timer_isr();
+//    SETGATE(idt[ IRQ_OFFSET +IRQ_TIMER  ], false, GD_KT, timer_isr, 0);
 
+    /* Load IDT */
+    lidt(&t);
 }
