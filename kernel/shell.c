@@ -13,7 +13,8 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
-	{ "print_tick", "Display system tick", print_tick }
+	{ "print_tick", "Display system tick", print_tick },
+    { "chgcolor", "Change text color", chgcolor }
 };
 #define NCOMMANDS (sizeof(commands)/sizeof(commands[0]))
 
@@ -27,6 +28,7 @@ int mon_help(int argc, char **argv)
 	return 0;
 }
 
+extern char __TEXT_BEGIN__, __TEXT_END__, __DATA_BEGIN__, __DATA_END__;
 int mon_kerninfo(int argc, char **argv)
 {
 	/* TODO: Print the kernel code and data section size 
@@ -35,11 +37,31 @@ int mon_kerninfo(int argc, char **argv)
    *       Use PROVIDE inside linker script and calculate the
    *       offset.
    */
+    cprintf("Kernel Code Base: %p Size: %6d bytes.\n", &__TEXT_BEGIN__, &__TEXT_END__ - &__TEXT_BEGIN__);
+    cprintf("       Data Base: %p Size: %6d bytes.\n", &__DATA_BEGIN__, &__DATA_END__ - &__DATA_BEGIN__);
 	return 0;
 }
 int print_tick(int argc, char **argv)
 {
 	cprintf("Now tick = %d\n", get_tick());
+}
+
+int atoi(const char a[]){
+    int res = 0;
+    for(;*a;a++){
+        res = res*10 + *a - '0';
+    }
+    return res;
+}
+
+int chgcolor(int argc, char **argv)
+{
+    if(argc == 1){
+        cprintf("No input text color!");
+        return 1;
+    }
+    int fg = atoi(argv[1]), bg = 0;
+    settextcolor(fg, bg);
 }
 
 #define WHITESPACE "\t\r\n "

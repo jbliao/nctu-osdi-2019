@@ -123,12 +123,15 @@ trap_dispatch(struct Trapframe *tf)
    *       already. Please reference in kernel/kbd.c and kernel/timer.c
    */
 
-	// Unexpected trap: The user process or the kernel has a bug.
     switch(tf->tf_trapno){
         case IRQ_OFFSET+IRQ_KBD:
             kbd_intr();
             return;
+        case IRQ_OFFSET+IRQ_TIMER:
+            timer_handler();
+            return;
     }
+	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
 }
 
@@ -173,8 +176,8 @@ void trap_init()
     extern kbd_isr();
     SETGATE(idt[ IRQ_OFFSET +IRQ_KBD  ], false, GD_KT, kbd_isr, 0);
     /* Timer Trap setup */
-//    extern timer_isr();
-//    SETGATE(idt[ IRQ_OFFSET +IRQ_TIMER  ], false, GD_KT, timer_isr, 0);
+    extern timer_isr();
+    SETGATE(idt[ IRQ_OFFSET +IRQ_TIMER  ], false, GD_KT, timer_isr, 0);
 
     /* Load IDT */
     lidt(&t);

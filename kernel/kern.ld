@@ -18,7 +18,9 @@ SECTIONS
 	/* AT(...) gives the load address of this section, which tells
 	   the boot loader where to load the kernel in physical memory */
 	.text : {
+        PROVIDE(__TEXT_BEGIN__ = .);
 		*(.text .stub .text.* .gnu.linkonce.t.*)
+        PROVIDE(__TEXT_END__ = .);
 	} : LOAD
 	PROVIDE(etext = .);	/* Define the 'etext' symbol to this value */
 
@@ -48,7 +50,9 @@ SECTIONS
 
 	/* The data segment */
 	.data : {
+        PROVIDE(__DATA_BEGIN__ = .);
 		*(.data)
+        PROVIDE(__DATA_END__ = .);
 	}
 	.bss : {
 		*(.bss)
