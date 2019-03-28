@@ -9,6 +9,7 @@
 extern void init_video(void);
 void kernel_main(void)
 {
+    int *ptr;
 	init_video();
 
 	pic_init();
@@ -20,6 +21,10 @@ void kernel_main(void)
 
 	/* Enable interrupt */
 	__asm __volatile("sti");
+
+    /* Test for page fault handler */
+    ptr = (int*)(0x12345678);
+    //*ptr = 1;
 
 	shell();
 }
