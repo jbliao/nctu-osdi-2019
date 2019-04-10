@@ -1,4 +1,5 @@
 #include <inc/mmu.h>
+#include <inc/memlayout.h>
 
 .set PROT_MODE_CSEG, 0x8         # kernel code segment selector
 .set PROT_MODE_DSEG, 0x10        # kernel data segment selector
@@ -61,8 +62,8 @@ gdt:
 
 	SEG_NULL    # NULL segment
 
-    SEG(STA_X|STA_R, 0, 0xFFFF << 12)    # Kernel code segment
-	SEG(STA_W, 0x0, 0xFFFF << 12)     # Kernel data segment
+    SEG(STA_X|STA_R , 0x0  , 0xFFFF)    # Kernel code segment
+	SEG(STA_W       , 0x0 , 0xFFFF)     # Kernel data segment
 
 # TODO: Please fillup the GDT register for gdt in order to used
 #       with "lgdt" instruction.

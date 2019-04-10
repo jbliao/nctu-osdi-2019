@@ -130,6 +130,9 @@ trap_dispatch(struct Trapframe *tf)
         case IRQ_OFFSET+IRQ_TIMER:
             timer_handler();
             return;
+        case T_PGFLT:
+            cprintf("[0756122] Page Fault @ %x\n", rcr2());
+            while(1);
     }
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
@@ -178,6 +181,9 @@ void trap_init()
     /* Timer Trap setup */
     extern timer_isr();
     SETGATE(idt[ IRQ_OFFSET +IRQ_TIMER  ], false, GD_KT, timer_isr, 0);
+
+    extern pgfault();
+    SETGATE(idt[T_PGFLT], true, GD_KT, pgfault, 0);
 
     /* Load IDT */
     lidt(&t);

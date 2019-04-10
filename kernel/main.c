@@ -13,18 +13,19 @@ void kernel_main(void)
 	init_video();
 
 	pic_init();
-  /* TODO: You should uncomment them
-   */
+    
 	kbd_init();
     timer_init();
     trap_init();
+
+    mem_init();
 
 	/* Enable interrupt */
 	__asm __volatile("sti");
 
     /* Test for page fault handler */
     ptr = (int*)(0x12345678);
-    //*ptr = 1;
+    *ptr = 1;
 
 	shell();
 }
