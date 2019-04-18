@@ -34,4 +34,12 @@ debug:
 clean:
 	rm $(OBJDIR)/boot/*.o $(OBJDIR)/boot/boot.out $(OBJDIR)/boot/boot $(OBJDIR)/boot/boot.asm &&\
 	rm $(OBJDIR)/kernel/*.o $(OBJDIR)/kernel/system* kernel.* &&\
-	rm $(OBJDIR)/lib/*.o || true
+	rm $(OBJDIR)/lib/*.o &&\
+	rm -rf $(OBJDIR)/user/*.o &&\
+	rm -rf $(OBJDIR)/user/*.asm || true
+
+qemu:
+	qemu-system-i386 -hda kernel.img -monitor stdio
+
+debug:
+	qemu-system-i386 -hda kernel.img -monitor stdio -s -S
