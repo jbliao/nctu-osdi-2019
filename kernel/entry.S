@@ -19,12 +19,12 @@ entry:
 	# physical addresses [0, 4MB).  This 4MB region will be
 	# sufficient until we set up our real page table in mem_init.
 
-    movl $0, %eax
-    movl $(RELOC(bss_start)), %edi
-    movl $(RELOC(end)), %ecx
-    subl %edi, %ecx
-    cld
-    rep stosb
+#    movl $0, %eax
+#    movl $(RELOC(bss_start)), %edi
+#    movl $(RELOC(end)), %ecx
+#    subl %edi, %ecx
+#    cld
+#    rep stosb
 
 	# Load the physical address of entry_pgdir into cr3.  entry_pgdir
 	# is defined in entrypgdir.c.
@@ -32,8 +32,8 @@ entry:
 	movl	%eax, %cr3
 	# Turn on paging.
 	movl	%cr0, %eax
-	orl	$(CR0_PE|CR0_PG|CR0_WP), %eax
-	movl	%eax, %cr0
+	orl	    $(CR0_PE|CR0_PG|CR0_WP), %eax
+    movl	%eax, %cr0
 
 	# Now paging is enabled, but we're still running at a low EIP
 	# (why is this okay?).  Jump up above KERNBASE before entering
@@ -43,8 +43,8 @@ entry:
 
 relocated:
 
-  # Setup new gdt
-  lgdt    kgdtdesc
+    # Setup new gdt
+    lgdt    kgdtdesc
 
 	# Setup kernel stack
 	movl $0, %ebp

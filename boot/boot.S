@@ -8,7 +8,7 @@
 .globl start
 start:
 	.code16                     # Assemble for 16-bit mode
-	
+
     # Set up the important data segment registers (DS, ES, SS).
 	xorw    %ax,%ax             # Segment number zero
 	movw    %ax,%ds             # -> Data Segment
@@ -19,8 +19,8 @@ start:
 	cld                         # String operations increment
 
 	# Switch from real to protected mode, using a bootstrap GDT
-	# and segment translation that makes virtual addresses 
-	# identical to their physical addresses, so that the 
+	# and segment translation that makes virtual addresses
+	# identical to their physical addresses, so that the
 	# effective memory map does not change during the switch.
 	lgdt    gdtdesc
 	movl    %cr0, %eax
@@ -55,6 +55,6 @@ gdt:
     SEG(STA_X|STA_R , 0x0  , 0xFFFFFFFF)    # Kernel code segment
 	SEG(STA_W       , 0x0 , 0xFFFFFFFF)     # Kernel data segment
 
-gdtdesc: 
+gdtdesc:
 	.word gdtdesc - gdt - 1	# gdt limit
 	.word gdt, 0x0	# gdt base

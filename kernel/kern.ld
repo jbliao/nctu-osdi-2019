@@ -24,7 +24,7 @@ SECTIONS
       lib/syscall.o (.text)
       user/shell.o (.text)
       user/main.o (.text)
-      /usr/lib/gcc/i686-redhat-linux/4.5.1/libgcc.a (.*)
+      /usr/lib/gcc/x86_64-linux-gnu/7/32/libgcc.a (.*) 
       PROVIDE(UTEXT_end = .);
       *(.text .stub .text.* .gnu.linkonce.t.*)
     }
@@ -47,11 +47,12 @@ SECTIONS
     PROVIDE(rdata_end = .);
 
     /* Include debugging information in kernel memory */
+
     .stab : {
       PROVIDE(__STAB_BEGIN__ = .);
       *(.stab);
       PROVIDE(__STAB_END__ = .);
-      BYTE(0)		/* Force the linker to allocate space
+/*      BYTE(0)		/* Force the linker to allocate space
       for this section */
     }
 
@@ -59,7 +60,7 @@ SECTIONS
       PROVIDE(__STABSTR_BEGIN__ = .);
       *(.stabstr);
       PROVIDE(__STABSTR_END__ = .);
-      BYTE(0)		/* Force the linker to allocate space
+/*      BYTE(0)		/* Force the linker to allocate space
       for this section */
     }
 

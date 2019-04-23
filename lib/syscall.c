@@ -36,8 +36,13 @@ syscall(int num, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5
 	return ret;
 }
 
-
 SYSCALL_NOARG(getc, int)
+SYSCALL_NOARG(cls, int32_t)
+SYSCALL_NOARG(get_num_used_page, int32_t)
+SYSCALL_NOARG(get_num_free_page, int32_t)
+SYSCALL_NOARG(get_ticks, unsigned long)
+SYSCALL_NOARG(fork, int32_t)
+SYSCALL_NOARG(getpid, int32_t)
 
 void
 puts(const char *s, size_t len)
@@ -54,3 +59,18 @@ puts(const char *s, size_t len)
  *
  * HINT: You can use SYSCALL_NOARG to save your time.
  */
+
+void
+settextcolor(unsigned char forecolor, unsigned char backcolor){
+    syscall(SYS_settextcolor, (uint32_t) forecolor, (uint32_t) backcolor, 0, 0, 0);
+}
+
+void
+kill_self(){
+    syscall(SYS_kill, getpid(), 0, 0, 0, 0);
+}
+
+void
+sleep(uint32_t ticks){
+    syscall(SYS_sleep, ticks, 0, 0, 0, 0);
+}

@@ -20,7 +20,7 @@ struct Pseudodesc idt_pd = {
 	sizeof(idt) - 1, (uint32_t) idt
 };
 
-* Trap handlers */
+/* Trap handlers */
 TrapHandler trap_hnd[256] = { 0 };
 
 static const char *trapname(int trapno)
@@ -147,7 +147,7 @@ trap_dispatch(struct Trapframe *tf)
 	/* Lab3: Check the trap number and call the interrupt handler. */
 	if (trap_hnd[tf->tf_trapno] != NULL)
 	{
-	
+
 		if ((tf->tf_cs & 3) == 3)
 		{
 			// Trapped from user mode.
@@ -162,12 +162,12 @@ trap_dispatch(struct Trapframe *tf)
 			// will restart at the trap point.
 			cur_task->tf = *tf;
 			tf = &(cur_task->tf);
-				
+
 		}
 		// Do ISR
 		trap_hnd[tf->tf_trapno](tf);
-		
-		// Pop the kernel stack 
+
+		// Pop the kernel stack
 		env_pop_tf(tf);
 		return;
 	}
@@ -179,14 +179,11 @@ trap_dispatch(struct Trapframe *tf)
         case IRQ_OFFSET+IRQ_TIMER:
             timer_handler();
             return;
-        case T_PGFLT:
-            cprintf("[0756122] Page Fault @ %x\n", rcr2());
-            while(1);
     }
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
 	panic("Unexpected trap!");
-	
+
 }
 
 void default_trap_handler(struct Trapframe *tf)
@@ -223,6 +220,10 @@ void trap_init()
 	SETGATE(idt[T_GPFLT], 1, GD_KT, GPFLT, 0);
 	extern void STACK_ISR();
 	SETGATE(idt[T_STACK], 1, GD_KT, STACK_ISR, 0);
+    extern void KBD_Input();
+    SETGATE(idt[IRQ_OFFSET+IRQ_KBD], 0, GD_KT, KBD_Input, 0);
+    extern void TIM_ISR();
+    SETGATE(idt[IRQ_OFFSET+IRQ_TIMER], 0, GD_KT, TIM_ISR, 0);
 
   /* Using custom trap handler */
 	extern void PGFLT();

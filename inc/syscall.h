@@ -10,11 +10,11 @@ enum {
 	SYS_fork,
 	SYS_kill,
 	SYS_sleep,
-  SYS_get_num_used_page,
-  SYS_get_num_free_page,
-  SYS_get_ticks,
-  SYS_settextcolor,
-  SYS_cls,
+    SYS_get_num_used_page,
+    SYS_get_num_free_page,
+    SYS_get_ticks,
+    SYS_settextcolor,
+    SYS_cls,
 
 	NSYSCALLS
 };
@@ -33,7 +33,7 @@ int32_t fork(void);
 
 int32_t getpid(void);
 
-void kill_self();
+void kill_self(void);
 
 void sleep(uint32_t ticks);
 
