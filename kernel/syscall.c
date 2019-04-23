@@ -61,36 +61,36 @@ int32_t do_syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, ui
      */
 		break;
 
-  case SYS_get_num_free_page:
-		/* TODO: Lab 5
+    case SYS_get_num_free_page:
+        /* TODO: Lab 5
      * You can reference kernel/mem.c
      */
-    break;
+        break;
 
-  case SYS_get_num_used_page:
-		/* TODO: Lab 5
+    case SYS_get_num_used_page:
+        /* TODO: Lab 5
      * You can reference kernel/mem.c
      */
-    break;
+        break;
 
-  case SYS_get_ticks:
-		/* TODO: Lab 5
+    case SYS_get_ticks:
+        /* TODO: Lab 5
      * You can reference kernel/timer.c
      */
-    retVal = sys_get_ticks();
-    break;
+        retVal = sys_get_ticks();
+        break;
 
-  case SYS_settextcolor:
-		/* TODO: Lab 5
+    case SYS_settextcolor:
+        /* TODO: Lab 5
      * You can reference kernel/screen.c
      */
-    break;
+        break;
 
-  case SYS_cls:
-		/* TODO: Lab 5
+    case SYS_cls:
+        /* TODO: Lab 5
      * You can reference kernel/screen.c
      */
-    break;
+        break;
 
 	}
 	return retVal;
@@ -103,6 +103,15 @@ static void syscall_handler(struct Trapframe *tf)
    * Please remember to fill in the return value
    * HINT: You have to know where to put the return value
    */
+    struct PushRegs* regs = &(tf->tf_regs);
+    regs->reg_eax = do_syscall(
+            regs->reg_eax,
+            regs->reg_edx,
+            regs->reg_ecx,
+            regs->reg_ebx,
+            regs->reg_edi,
+            regs->reg_esi
+        );
 
 }
 
@@ -112,6 +121,9 @@ void syscall_init()
    * Please set gate of system call into IDT
    * You can leverage the API register_handler in kernel/trap.c
    */
+
+    extern SYSCALL_ISR();
+    register_handler(T_SYSCALL, syscall_handler, SYSCALL_ISR, true, 3);
 
 }
 

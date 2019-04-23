@@ -11,7 +11,7 @@
 // Set up global descriptor table (GDT) with separate segments for
 // kernel mode and user mode.  Segments serve many purposes on the x86.
 // We don't use any of their memory-mapping capabilities, but we need
-// them to switch privilege levels. 
+// them to switch privilege levels.
 //
 // The kernel and user segments are identical except for the DPL.
 // To load the SS register, the CPL must equal the DPL.  Thus,
@@ -41,7 +41,7 @@ struct Segdesc gdt[6] =
 	// First TSS descriptors (starting from GD_TSS0) are initialized
 	// in task_init()
 	[GD_TSS0 >> 3] = SEG_NULL
-	
+
 };
 
 struct Pseudodesc gdt_pd = {
@@ -100,12 +100,25 @@ int task_create()
 	Task *ts = NULL;
 
 	/* Find a free task structure */
+    int i;
+    for (i = 0; i != NR_TASKS ; i++){
+        if( tasks[i].state == TASK_FREE )
+            ts = &tasks[i];
+            break;
+    }
+    if(!ts) return -1;
 
-  /* Setup Page Directory and pages for kernel*/
-  if (!(ts->pgdir = setupkvm()))
-    panic("Not enough memory for per process page directory!\n");
+    /* Setup Page Directory and pages for kernel*/
+    if (!(ts->pgdir = setupkvm()))
+        panic("Not enough memory for per process page directory!\n");
 
-  /* Setup User Stack */
+    /* Setup User Stack */
+    for( int va = USTACKTOP - USR_STACK_SIZE; va != USTACKTOP; va += PGSIZE){
+        struct PageInfo *pp = page_alloc(ALLOC_ZERO);
+        if(!pp) return -1;
+        if(page_insert(ts->pgdir, pp, va, PTE_W| PTE_U) == -1)
+            return -1;
+    }
 
 	/* Setup Trapframe */
 	memset( &(ts->tf), 0, sizeof(ts->tf));
@@ -117,6 +130,14 @@ int task_create()
 	ts->tf.tf_esp = USTACKTOP-PGSIZE;
 
 	/* Setup task structure (task_id and parent_id) */
+    ts->task_id = i;
+    if(cur_task)
+        ts->parent_id = cur_task->task_id;
+    else
+        ts->parent_id = ts->task_id;
+    ts->state = TASK_RUNNABLE;
+    ts->remind_ticks = TIME_QUANT;
+    return i;
 }
 
 
@@ -180,14 +201,14 @@ void sys_kill(int pid)
 int sys_fork()
 {
   /* pid for newly created process */
-  int pid;
+    int pid;
 	if ((uint32_t)cur_task)
 	{
     /* Step 4: All user program use the same code for now */
-    setupvm(tasks[pid].pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
-    setupvm(tasks[pid].pgdir, (uint32_t)UDATA_start, UDATA_SZ);
-    setupvm(tasks[pid].pgdir, (uint32_t)UBSS_start, UBSS_SZ);
-    setupvm(tasks[pid].pgdir, (uint32_t)URODATA_start, URODATA_SZ);
+        setupvm(tasks[pid].pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
+        setupvm(tasks[pid].pgdir, (uint32_t)UDATA_start, UDATA_SZ);
+        setupvm(tasks[pid].pgdir, (uint32_t)UBSS_start, UBSS_SZ);
+        setupvm(tasks[pid].pgdir, (uint32_t)URODATA_start, URODATA_SZ);
 
 	}
 }
@@ -198,12 +219,12 @@ int sys_fork()
  */
 void task_init()
 {
-  extern int user_entry();
-	int i;
-  UTEXT_SZ = (uint32_t)(UTEXT_end - UTEXT_start);
-  UDATA_SZ = (uint32_t)(UDATA_end - UDATA_start);
-  UBSS_SZ = (uint32_t)(UBSS_end - UBSS_start);
-  URODATA_SZ = (uint32_t)(URODATA_end - URODATA_start);
+    extern int user_entry();
+    int i;
+    UTEXT_SZ = (uint32_t)(UTEXT_end - UTEXT_start);
+    UDATA_SZ = (uint32_t)(UDATA_end - UDATA_start);
+    UBSS_SZ = (uint32_t)(UBSS_end - UBSS_start);
+    URODATA_SZ = (uint32_t)(URODATA_end - URODATA_start);
 
 	/* Initial task sturcture */
 	for (i = 0; i < NR_TASKS; i++)
@@ -230,24 +251,24 @@ void task_init()
 	i = task_create();
 	cur_task = &(tasks[i]);
 
-  /* For user program */
-  setupvm(cur_task->pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
-  setupvm(cur_task->pgdir, (uint32_t)UDATA_start, UDATA_SZ);
-  setupvm(cur_task->pgdir, (uint32_t)UBSS_start, UBSS_SZ);
-  setupvm(cur_task->pgdir, (uint32_t)URODATA_start, URODATA_SZ);
-  cur_task->tf.tf_eip = (uint32_t)user_entry;
-	
+    /* For user program */
+    setupvm(cur_task->pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
+    setupvm(cur_task->pgdir, (uint32_t)UDATA_start, UDATA_SZ);
+    setupvm(cur_task->pgdir, (uint32_t)UBSS_start, UBSS_SZ);
+    setupvm(cur_task->pgdir, (uint32_t)URODATA_start, URODATA_SZ);
+    cur_task->tf.tf_eip = (uint32_t)user_entry;
+
 	/* Load GDT&LDT */
 	lgdt(&gdt_pd);
 
 
 	lldt(0);
 
-	// Load the TSS selector 
+	// Load the TSS selector
 	ltr(GD_TSS0);
 
 	cur_task->state = TASK_RUNNING;
-	
+
 }
 
 

@@ -6,7 +6,7 @@
 
 extern int vprintk(const char *fmt, va_list ap);
 
-const char *panicstr;
+const char *panicstr = NULL;
 
 /*
  * Panic is called on unresolvable fatal errors.
@@ -17,8 +17,8 @@ _panic(const char *file, int line, const char *fmt,...)
 {
 	va_list ap;
 
-	if (panicstr)
-		goto dead;
+//	if (panicstr)
+//		goto dead;
 	panicstr = fmt;
 
 	// Be extra sure that the machine is in as reasonable state

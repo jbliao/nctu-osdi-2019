@@ -147,6 +147,7 @@ int forktest(int argc, char **argv)
 
 void shell()
 {
+  while(1);
   char *buf;
   hist_head = 0;
   hist_tail = 0;

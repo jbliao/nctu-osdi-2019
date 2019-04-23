@@ -17,7 +17,6 @@ void kernel_main(void)
 	extern char stext[];
 	extern char etext[], end[], data_start[],rdata_end[];
 	extern void task_job();
-
 	init_video();
 
 	trap_init();
@@ -33,7 +32,7 @@ void kernel_main(void)
 
     task_init();
 
-  /* Enable interrupt */
+ /* Enable interrupt */
     __asm __volatile("sti");
 
     lcr3(PADDR(cur_task->pgdir));

@@ -19,12 +19,12 @@ entry:
 	# physical addresses [0, 4MB).  This 4MB region will be
 	# sufficient until we set up our real page table in mem_init.
 
-#    movl $0, %eax
-#    movl $(RELOC(bss_start)), %edi
-#    movl $(RELOC(end)), %ecx
-#    subl %edi, %ecx
-#    cld
-#    rep stosb
+    movl $0, %eax
+    movl $(RELOC(bss_start)), %edi
+    movl $(RELOC(end)), %ecx
+    subl %edi, %ecx
+    cld
+    rep stosb
 
 	# Load the physical address of entry_pgdir into cr3.  entry_pgdir
 	# is defined in entrypgdir.c.

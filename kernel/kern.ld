@@ -52,7 +52,7 @@ SECTIONS
       PROVIDE(__STAB_BEGIN__ = .);
       *(.stab);
       PROVIDE(__STAB_END__ = .);
-/*      BYTE(0)		/* Force the linker to allocate space
+      BYTE(0)		/* Force the linker to allocate space
       for this section */
     }
 
@@ -60,7 +60,7 @@ SECTIONS
       PROVIDE(__STABSTR_BEGIN__ = .);
       *(.stabstr);
       PROVIDE(__STABSTR_END__ = .);
-/*      BYTE(0)		/* Force the linker to allocate space
+      BYTE(0)		/* Force the linker to allocate space
       for this section */
     }
 
@@ -82,8 +82,8 @@ SECTIONS
     PROVIDE(UDATA_end = .);
       *(.data)
     }
-    PROVIDE(bss_start = .);
     .bss : {
+    PROVIDE(bss_start = .);
     PROVIDE(UBSS_start = .);
       lib/string.o (.bss)
       lib/printf.o (.bss)

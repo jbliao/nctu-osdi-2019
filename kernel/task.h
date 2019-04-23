@@ -26,7 +26,7 @@ typedef struct
 	int32_t remind_ticks;
 	TaskState state;	//Task state
   pde_t *pgdir;  //Per process Page Directory
-	
+
 } Task;
 
 void task_init();

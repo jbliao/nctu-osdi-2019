@@ -220,10 +220,6 @@ void trap_init()
 	SETGATE(idt[T_GPFLT], 1, GD_KT, GPFLT, 0);
 	extern void STACK_ISR();
 	SETGATE(idt[T_STACK], 1, GD_KT, STACK_ISR, 0);
-    extern void KBD_Input();
-    SETGATE(idt[IRQ_OFFSET+IRQ_KBD], 0, GD_KT, KBD_Input, 0);
-    extern void TIM_ISR();
-    SETGATE(idt[IRQ_OFFSET+IRQ_TIMER], 0, GD_KT, TIM_ISR, 0);
 
   /* Using custom trap handler */
 	extern void PGFLT();
