@@ -102,11 +102,15 @@ int task_create()
 	/* Find a free task structure */
     int i;
     for (i = 0; i != NR_TASKS ; i++){
-        if( tasks[i].state == TASK_FREE )
+        if( tasks[i].state == TASK_FREE ){
             ts = &tasks[i];
             break;
+        }
     }
-    if(!ts) return -1;
+    if(!ts){
+        printk("No more task.\n");
+        return -1;
+    }
 
     /* Setup Page Directory and pages for kernel*/
     if (!(ts->pgdir = setupkvm()))
@@ -160,6 +164,12 @@ int task_create()
  */
 static void task_free(int pid)
 {
+    lcr3(PADDR(kern_pgdir));
+    for(int va = USTACKTOP - USR_STACK_SIZE; va != USTACKTOP; va += PGSIZE){
+        page_remove(tasks[pid].pgdir, va);
+    }
+    ptable_remove(tasks[pid].pgdir);
+    pgdir_remove(tasks[pid].pgdir);
 }
 
 void sys_kill(int pid)
@@ -171,6 +181,9 @@ void sys_kill(int pid)
    * Free the memory
    * and invoke the scheduler for yield
    */
+        tasks[pid].state = TASK_FREE;
+        task_free(pid);
+        sched_yield();
 	}
 }
 
@@ -201,15 +214,34 @@ void sys_kill(int pid)
 int sys_fork()
 {
   /* pid for newly created process */
-    int pid;
+    int pid = task_create();
+    if(pid == -1) return -1;
 	if ((uint32_t)cur_task)
 	{
     /* Step 4: All user program use the same code for now */
+        /* gen stack space and copy current on that */
+        tasks[pid].tf = cur_task->tf;
+
+        for(int va = USTACKTOP ; va > USTACKTOP - USR_STACK_SIZE ; va -= PGSIZE) {
+            pte_t *pte_src, *pte_dst;
+            if(!(pte_dst = pgdir_walk(tasks[pid].pgdir, va - PGSIZE, 0)))
+                panic("dst stack does not exist\n");
+            if(!(*pte_dst & PTE_P))
+                panic("dst stack page does not present\n");
+            if(!(pte_src = pgdir_walk(cur_task->pgdir, va - PGSIZE, 0)))
+                panic("src stack does not exist\n");
+            if(!(*pte_src & PTE_P))
+                panic("src stack page does not present\n");
+            memcpy(KADDR(PTE_ADDR(*pte_dst)), KADDR(PTE_ADDR(*pte_src)), PGSIZE);
+        }
+
         setupvm(tasks[pid].pgdir, (uint32_t)UTEXT_start, UTEXT_SZ);
         setupvm(tasks[pid].pgdir, (uint32_t)UDATA_start, UDATA_SZ);
         setupvm(tasks[pid].pgdir, (uint32_t)UBSS_start, UBSS_SZ);
         setupvm(tasks[pid].pgdir, (uint32_t)URODATA_start, URODATA_SZ);
-
+        /* trap ret val */
+        cur_task->tf.tf_regs.reg_eax = pid;
+        tasks[pid].tf.tf_regs.reg_eax = 0;
 	}
 }
 

@@ -38,6 +38,7 @@
 TRAPHANDLER_NOEC(Default_ISR, T_DEFAULT)
 TRAPHANDLER_NOEC(KBD_Input, IRQ_OFFSET+IRQ_KBD)
 TRAPHANDLER_NOEC(TIM_ISR, IRQ_OFFSET+IRQ_TIMER)
+TRAPHANDLER_NOEC(SYSCALL_ISR, T_SYSCALL)
 
 // TODO: Lab 5
 // Please add interface of system call
@@ -45,7 +46,6 @@ TRAPHANDLER_NOEC(TIM_ISR, IRQ_OFFSET+IRQ_TIMER)
 TRAPHANDLER(GPFLT, T_GPFLT)
 TRAPHANDLER(STACK_ISR, T_STACK)
 TRAPHANDLER(PGFLT, T_PGFLT)
-TRAPHANDLER(SYSCALL_ISR, T_SYSCALL)
 
 .globl default_trap_handler;
 _alltraps:
@@ -62,10 +62,10 @@ _alltraps:
 	mov %ax, %es
 	mov %ax, %fs
 	mov %ax, %gs
-	
+
 	pushl %esp # Pass a pointer to the Trapframe as an argument to default_trap_handler()
 	call default_trap_handler
-	
+
 	/* Restore fs and gs to user data segmemnt */
 	push %ax
 	mov $(GD_UD), %ax

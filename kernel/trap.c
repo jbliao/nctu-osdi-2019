@@ -172,14 +172,6 @@ trap_dispatch(struct Trapframe *tf)
 		return;
 	}
 
-    switch(tf->tf_trapno){
-        case IRQ_OFFSET+IRQ_KBD:
-            kbd_intr();
-            return;
-        case IRQ_OFFSET+IRQ_TIMER:
-            timer_handler();
-            return;
-    }
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
 	panic("Unexpected trap!");

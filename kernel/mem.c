@@ -25,8 +25,8 @@ size_t                   num_free_pages;
 // --------------------------------------------------------------
 
 static int
-nvram_read(int r)
-{
+nvram_read(int r){
+
   return mc146818_read(r) | (mc146818_read(r + 1) << 8);
 }
 
@@ -264,6 +264,7 @@ page_init(void)
     /* TODO */
     size_t i;
     char* first_free_page = boot_alloc(0);
+    num_free_pages = 0;
 	for (i = 0; i < npages; i++) {
         pages[i].pp_ref = 0;
         if ( page2pa(&pages[i]) == 0 ||
@@ -276,6 +277,7 @@ page_init(void)
         }else{
             pages[i].pp_link = page_free_list;
             page_free_list = &pages[i];
+            num_free_pages ++;
         }
     }
 }
@@ -304,6 +306,7 @@ page_alloc(int alloc_flags)
     ret->pp_link = NULL;
     if( alloc_flags & ALLOC_ZERO )
         memset( page2kva(ret), 0, PGSIZE);
+    num_free_pages --;
     return ret;
 }
 
@@ -321,6 +324,7 @@ page_free(struct PageInfo *pp)
     if( pp->pp_link || pp->pp_ref ) panic("fuck you");
     pp->pp_link = page_free_list;
     page_free_list = pp;
+    num_free_pages++;
 }
 
 //
@@ -394,7 +398,7 @@ boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm
 //        page_insert(pgdir, pa2page(pa+i*PGSIZE), va+i*PGSIZE, perm);
         pte_t* ptep = pgdir_walk(pgdir, va + i * PGSIZE, 1);
         *ptep = PTE_ADDR(pa + i * PGSIZE) | PTE_P | perm;
-        
+
     }
 }
 
@@ -559,7 +563,7 @@ setupkvm()
                         PADDR(pages),
                         PTE_U);
         boot_map_region(pgdir, KSTACKTOP - KSTKSIZE, KSTKSIZE, PADDR(bootstack), PTE_W);
-        boot_map_region(pgdir, KERNBASE, -KERNBASE, 0, PTE_W);
+        boot_map_region(pgdir, KERNBASE, ~0 - KERNBASE + 1, 0, PTE_W | PTE_U);
         boot_map_region(pgdir, IOPHYSMEM, ROUNDUP(EXTPHYSMEM - IOPHYSMEM, PGSIZE), IOPHYSMEM, PTE_W);
     }
     return pgdir;

@@ -31,6 +31,7 @@
 
 #define SECTSIZE	512
 #define ELFHDR		((struct Elf *) 0x10000) // scratch space
+#define KERNBASE    0xF0000000
 
 void readsect(void*, uint32_t);
 void readseg(uint32_t, uint32_t, uint32_t);
@@ -50,10 +51,14 @@ bootmain(void)
 	// load each program segment (ignores ph flags)
 	ph = (struct Proghdr *) ((uint8_t *) ELFHDR + ELFHDR->e_phoff);
 	eph = ph + ELFHDR->e_phnum;
-	for (; ph < eph; ph++)
+	for (; ph < eph; ph++){
 		// p_pa is the load address of this segment (as well
 		// as the physical address)
-		readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
+        void* pa = ph->p_pa;
+        if(pa > KERNBASE)
+            pa -= KERNBASE;
+		readseg(pa, ph->p_memsz, ph->p_offset);
+    }
 	// call the entry point from the ELF header
 	// note: does not return!
 	((void (*)(void)) (ELFHDR->e_entry))();
