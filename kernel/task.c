@@ -243,6 +243,7 @@ int sys_fork()
         cur_task->tf.tf_regs.reg_eax = pid;
         tasks[pid].tf.tf_regs.reg_eax = 0;
 	}
+    return pid;
 }
 
 /* TODO: Lab5

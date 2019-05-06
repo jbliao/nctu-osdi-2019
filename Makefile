@@ -23,10 +23,10 @@ all: boot/boot kernel/system
 	dd if=$(OBJDIR)/kernel/system of=$(OBJDIR)/kernel.img seek=1 conv=notrunc 2>/dev/null
 
 run: all
-	qemu-system-i386 -m 4M -hda kernel.img -curses
+	qemu-system-i386 -hda kernel.img -curses
 
 debug: all
-	qemu-system-i386 -m 4M -hda kernel.img -curses -s -S
+	qemu-system-i386 -hda kernel.img -curses -s -S
 
 clean:
 	rm $(OBJDIR)/boot/*.o $(OBJDIR)/boot/boot.out $(OBJDIR)/boot/boot $(OBJDIR)/boot/boot.asm || true
