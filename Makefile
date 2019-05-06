@@ -17,16 +17,18 @@ CFLAGS += -I.
 
 OBJDIR = .
 
+CPUS ?= 1
+
 all: boot/boot kernel/system
 	dd if=/dev/zero of=$(OBJDIR)/kernel.img count=10000 2>/dev/null
 	dd if=$(OBJDIR)/boot/boot of=$(OBJDIR)/kernel.img conv=notrunc 2>/dev/null
 	dd if=$(OBJDIR)/kernel/system of=$(OBJDIR)/kernel.img seek=1 conv=notrunc 2>/dev/null
 
 run: all
-	qemu-system-i386 -hda kernel.img -curses
+	qemu-system-i386 -hda kernel.img -curses -smp $(CPUS)
 
 debug: all
-	qemu-system-i386 -hda kernel.img -curses -s -S
+	qemu-system-i386 -hda kernel.img -curses -s -S -smp $(CPUS)
 
 clean:
 	rm $(OBJDIR)/boot/*.o $(OBJDIR)/boot/boot.out $(OBJDIR)/boot/boot $(OBJDIR)/boot/boot.asm || true
@@ -37,4 +39,3 @@ clean:
 
 include boot/Makefile
 include kernel/Makefile
-
