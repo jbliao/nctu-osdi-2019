@@ -3,7 +3,7 @@
 
 #include <inc/trap.h>
 #include <kernel/mem.h>
-#define NR_TASKS	10
+#define NR_TASKS	32
 #define TIME_QUANT	100
 
 typedef enum
@@ -30,7 +30,7 @@ typedef struct
 } Task;
 
 // TODO Lab6
-// 
+//
 // Design your Runqueue structure for cpu
 // your runqueue sould have at least two
 // variables:
@@ -39,12 +39,14 @@ typedef struct
 //
 // 2. a list indicate the tasks in the runqueue
 //
+
 typedef struct
 {
-
+    int index;
+    Task* q[NR_TASKS+1];
 } Runqueue;
 
-
+void rq_pop(Runqueue*, int );
 void task_init();
 void task_init_percpu();
 void env_pop_tf(struct Trapframe *tf);

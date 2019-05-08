@@ -33,10 +33,10 @@
 .set PROT_MODE_CSEG, 0x8	# kernel code segment selector
 .set PROT_MODE_DSEG, 0x10	# kernel data segment selector
 
-.code16           
+.code16
 .globl mpentry_start
 mpentry_start:
-	cli            
+	cli
 
 	xorw    %ax, %ax
 	movw    %ax, %ds
@@ -66,11 +66,11 @@ start32:
 	movl    %eax, %cr3
 	# Turn on paging.
 	movl    %cr0, %eax
-	orl     $(CR0_PE|CR0_PG|CR0_WP), %eax
-	movl    %eax, %cr0
+    orl     $(CR0_PE|CR0_PG|CR0_WP), %eax
+    movl    %eax, %cr0
 
-	# Switch to the per-cpu stack allocated in boot_aps()
-	movl    mpentry_kstack, %esp
+    # Switch to the per-cpu stack allocated in boot_aps()
+    movl    mpentry_kstack, %esp
 	movl    $0x0, %ebp       # nuke frame pointer
 
 	# Call mp_main().  (Exercise for the reader: why the indirect call?)

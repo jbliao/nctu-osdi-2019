@@ -3,11 +3,14 @@
 #include <inc/string.h>
 #include <inc/stdio.h>
 
+#include <kernel/spinlock.h>
+
 /* These define our textpointer, our background and foreground
 *  colors (attributes), and x and y cursor coordinates */
 unsigned short *textmemptr;
 int attrib = 0x0F;
 int csr_x = 0, csr_y = 0;
+struct spinlock putch_lock;
 
 /* Scrolls the screen */
 void scroll(void)

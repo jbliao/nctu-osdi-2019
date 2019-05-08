@@ -4,15 +4,20 @@
 #include <kernel/cpu.h>
 #include <kernel/syscall.h>
 #include <kernel/trap.h>
+#include <kernel/spinlock.h>
 #include <inc/stdio.h>
+
+struct spinlock puts_lock;
 
 void do_puts(char *str, uint32_t len)
 {
 	uint32_t i;
+    spin_lock(&puts_lock);
 	for (i = 0; i < len; i++)
 	{
 		k_putch(str[i]);
 	}
+    spin_unlock(&puts_lock);
 }
 
 int32_t do_getc()
@@ -23,7 +28,7 @@ int32_t do_getc()
 int32_t do_syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5)
 {
 	int32_t retVal = -1;
-	extern Task *cur_task;
+	Task *cur_task = thiscpu->cpu_task;
 
 	switch (syscallno)
 	{
@@ -137,7 +142,7 @@ void syscall_init()
    * Please set gate of system call into IDT
    * You can leverage the API register_handler in kernel/trap.c
    */
-
+    spin_initlock(&puts_lock);
     extern SYSCALL_ISR();
     register_handler(T_SYSCALL, syscall_handler, SYSCALL_ISR, 1, 3);
 

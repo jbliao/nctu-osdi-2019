@@ -25,7 +25,7 @@ _panic(const char *file, int line, const char *fmt,...)
 	__asm __volatile("cli; cld");
 
 	va_start(ap, fmt);
-	printk("kernel panic at %s:%d: ", file, line);
+	printk("cpu%d kernel panic at %s:%d: ", cpunum(), file, line);
 	vprintk(fmt, ap);
 	printk("\n");
 	va_end(ap);

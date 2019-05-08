@@ -33,8 +33,9 @@ void timer_handler(struct Trapframe *tf)
 
     extern Task tasks[];
 
-    extern Task *cur_task;
+    Task *cur_task = thiscpu->cpu_task;
 
+    lapic_eoi();
     if (cur_task != NULL)
     {
     /* TODO: Lab 5
@@ -47,11 +48,14 @@ void timer_handler(struct Trapframe *tf)
     * 4. sched_yield() if the time is up for current task
     *
     */
-        for(int i = 0; i < NR_TASKS; i ++){
-            if(tasks[i].state == TASK_SLEEP){
-                tasks[i].remind_ticks --;
-                if(tasks[i].remind_ticks == 0)
-                    tasks[i].state = TASK_RUNNABLE;
+        Runqueue* rq = &thiscpu->cpu_rq;
+        for(int i = 0; rq->q[i]; i ++){
+            Task *t = rq->q[i];
+            if(t->state == TASK_SLEEP){
+                t->remind_ticks--;
+                if(t->remind_ticks <= 0){
+                    t->state = TASK_RUNNABLE;
+                }
             }
         }
 

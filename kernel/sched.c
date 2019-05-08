@@ -36,31 +36,18 @@
 //
 // 4. modify your scheduler so that each cpu will do scheduling
 //    with its runqueue
-//    
-//    (cpu can only schedule tasks which in its runqueue!!) 
-//    (do not schedule idle task if there are still another process can run)	
+//
+//    (cpu can only schedule tasks which in its runqueue!!)
+//    (do not schedule idle task if there are still another process can run)
 //
 void sched_yield(void)
 {
-	extern Task tasks[];
-	extern Task *cur_task;
-    int next_task_id = -1;
+    Task* next_task = rq_next(&thiscpu->cpu_rq);
 
-    /* Find next runnable task. */
-    for(int i = (cur_task - tasks + 1) % NR_TASKS ; i != (cur_task - tasks) ; i == NR_TASKS - 1 ? (i = 0) : (++i)) {
-        if(tasks[i].state == TASK_RUNNABLE) {
-            next_task_id = i;
-            break;
-        }
-    }
+    next_task->remind_ticks = TIME_QUANT;
+    next_task->state = TASK_RUNNING;
+    thiscpu->cpu_task = next_task;
 
-    /* Use current task if not found. */
-    if(next_task_id == -1)
-        next_task_id = cur_task - tasks;
-    cur_task = &(tasks[next_task_id]);
-    cur_task->remind_ticks = TIME_QUANT;
-    cur_task->state = TASK_RUNNING;
-
-    lcr3(PADDR(cur_task->pgdir));
-    ctx_switch(cur_task);
+    lcr3(PADDR(next_task->pgdir));
+    ctx_switch(next_task);
 }

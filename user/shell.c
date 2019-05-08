@@ -131,17 +131,20 @@ int forktest(int argc, char **argv)
 
     /*Child*/
     task_job();
-    if (fork())
+    if (fork()){
       task_job();
+    }
     else
     {
-      if (fork())
+      if (fork()){
         task_job();
+      }
       else
-        if (fork())
+        if (fork()){
           task_job();
-        else
+        }else{
           task_job();
+        }
     }
     /* task recycle */
     kill_self();
